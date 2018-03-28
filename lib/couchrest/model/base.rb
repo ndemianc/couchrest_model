@@ -86,8 +86,35 @@ module CouchRest
           database == other.database && id == other.id
         end
       end
+
       alias :eql? :==
 
+      def self.build_from_database(doc = {}, options = {}, &block)
+        src = doc[model_type_key]
+        base = src.blank? || src == model_type_value ? self : src.safe_constantize
+        return if base.blank?
+        base.new(doc, options.merge(directly_set_attributes: true), &block)
+      end
+
+      def self.exists?(id)
+        doc = database.get(id)
+        doc.present? && doc['type'] == to_s
+      end
+
+      def associated_changed?
+        self.class.has_many_associations.any? do |attrib|
+          send(attrib).any?(&:changed?)
+        end
+      end
+
+      def changed?
+        super || associated_changed?
+      end
+
+      def change_type(type)
+        result = database.save_doc(merge('type' => type))
+        result['ok'] || clear_changes_information
+      end
     end
   end
 end
