@@ -14,12 +14,13 @@ module CouchRest
       include Proxyable
       include PropertyProtection
       include Associations
+      include HasManyAssociations
       include Validations
       include Callbacks
       include Designs
       include CastedBy
       include Dirty
-      
+
 
       def self.subclasses
         @subclasses ||= []
@@ -68,13 +69,13 @@ module CouchRest
       alias :new_record? :new?
       alias :new_document? :new?
 
-      # Compare this model with another by confirming to see 
+      # Compare this model with another by confirming to see
       # if the IDs and their databases match!
       #
-      # Camparison of the database is required in case the 
+      # Camparison of the database is required in case the
       # model has been proxied or loaded elsewhere.
       #
-      # A Basic CouchRest document will only ever compare using 
+      # A Basic CouchRest document will only ever compare using
       # a Hash comparison on the attributes.
       def == other
         return false unless other.is_a?(Base)
